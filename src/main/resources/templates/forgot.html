@@ -1,0 +1,41 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:replace="~{partials/_header :: common_header(~{::title/text()},~{::link},~{::meta})}">
+  <!-- Custom meta data for this template-->
+  <meta name="description" content="meo home page">
+  <meta name="author" content="mfano">
+  <!-- Custom title for this page-->
+  <title>forgot</title>
+  <!-- Custom styles for this page-->
+</th:block>
+
+<body>
+
+  <th:block th:insert="~{partials/_nav}" />
+
+  <main class="container-fluid">
+    <div class="row">
+
+      <th:block th:insert="~{partials/_sidebar}" />
+
+      <div class="col-lg-10 p-4">
+        <h3>Forgot Password</h3>
+    <form th:action="@{/forgot}" method="post" class="row g-2">
+      <div class="col-md-6">
+        <input type="email" name="email" class="form-control" placeholder="Your registered email" required>
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-primary w-100">Send reset link</button>
+      </div>
+    </form>
+    <a href="/login" class="btn btn-link mt-3">Back to login</a>
+      </div>
+    </div>
+  </main>
+
+  <th:block th:insert="~{partials/_footer}" />
+
+</body>
+
+</html>

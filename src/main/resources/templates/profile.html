@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:replace="~{partials/_header :: common_header(~{::title/text()},~{::link},~{::meta})}">
+  <!-- Custom meta data for this template-->
+  <meta name="description" content="meo home page">
+  <meta name="author" content="mfano">
+  <!-- Custom title for this page-->
+  <title>profile</title>
+  <!-- Custom styles for this page-->
+</th:block>
+
+<body>
+
+  <main class="container-fluid">
+
+    <th:block th:insert="~{partials/_nav}" />
+
+    <div class="row">
+
+      <th:block th:insert="~{partials/_sidebar}" />
+
+      <div class="col-lg-10 p-4">
+        <h2>Profile</h2>
+        <div class="card p-3" th:if="${user}">
+          <p><strong>Name:</strong> <span th:text="${user.fullName}"></span></p>
+          <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
+          <p><strong>Role:</strong> <span th:text="${user.role}"></span></p>
+          <p><strong>Enabled:</strong> <span th:text="${user.enabled}"></span></p>
+        </div>
+        <a href="/logout" class="btn btn-outline-danger mt-2">Logout</a>
+      </div>
+    </div>
+  </main>
+
+  <th:block th:insert="~{partials/_footer}" />
+
+</body>
+
+</html>

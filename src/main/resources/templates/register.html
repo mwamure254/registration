@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:replace="~{partials/_header :: common_header(~{::title/text()},~{::link},~{::meta})}">
+  <!-- Custom meta data for this template-->
+  <meta name="description" content="meo home page">
+  <meta name="author" content="mfano">
+  <!-- Custom title for this page-->
+  <title>register</title>
+  <!-- Custom styles for this page-->
+</th:block>
+
+<body>
+  <main class="container-fluid">
+
+    <th:block th:insert="~{partials/_nav}" />
+
+    <div class="row">
+
+      <th:block th:insert="~{partials/_sidebar}" />
+
+      <div class="col-lg-10 p-4">
+
+        <h2>Create account</h2>
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+        <form th:action="@{/register}" method="post">
+          <div class="mb-3">
+            <label for="fullName" class="form-label">Full name</label>
+            <input type="text" class="form-control" id="fullName" name="fullName" required>
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+          </div>
+          <div class="mb-3">
+            <label for="role" class="form-label">Select Role</label>
+            <select class="form-select" id="role" name="role" required>
+              <option value="USER">User</option>
+              <option value="HOI">Head of Institution (HOI)</option>
+              <option value="DIRECTOR">Director</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" type="submit">Register</button>
+          <a class="btn btn-link" href="/login">Already have an account? Login</a>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <th:block th:insert="~{partials/_footer}" />
+
+</body>
+
+</html>

@@ -1,0 +1,50 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:replace="~{partials/_header :: common_header(~{::title/text()},~{::link},~{::meta})}">
+  <!-- Custom meta data for this template-->
+  <meta name="description" content="meo home page">
+  <meta name="author" content="mfano">
+  <!-- Custom title for this page-->
+  <title>login</title>
+  <!-- Custom styles for this page-->
+</th:block>
+
+<body>
+
+  <main class="container-fluid">
+
+    <th:block th:insert="~{partials/_nav}" />
+
+    <div class="row">
+
+      <th:block th:insert="~{partials/_sidebar}" />
+
+      <div class="col-lg-10 p-4">
+        <div>
+          <h2>Login</h2>
+          <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+          <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+          <form th:action="@{/login}" method="post">
+            <div class="mb-3">
+              <label for="username" class="form-label">Email</label>
+              <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <button class="btn btn-primary" type="submit">Login</button>
+            <a class="btn btn-link" href="/register">Register</a>
+            <a class="btn btn-link" href="/forgot">Forgot password?</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <th:block th:insert="~{partials/_footer}" />
+
+</body>
+
+</html>

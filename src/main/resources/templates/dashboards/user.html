@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:replace="~{partials/_header :: common_header(~{::title/text()},~{::link},~{::meta})}">
+    <!-- Custom meta data for this template-->
+    <meta name="description" content="meo home page">
+    <meta name="author" content="mfano">
+    <!-- Custom title for this page-->
+    <title>user</title>
+    <!-- Custom styles for this page-->
+</th:block>
+
+<body>
+
+    <main class="container-fluid">
+
+        <th:block th:insert="~{partials/_nav}" />
+
+        <div class="row">
+
+            <th:block th:insert="~{partials/_sidebar}" />
+            
+            <div class="col-lg-10 p-4">
+            
+            <h2>User Dashboard</h2>
+
+            </div>
+        </div>
+    </main>
+
+    <th:block th:insert="~{partials/_footer}" />
+
+</body>
+
+</html>
