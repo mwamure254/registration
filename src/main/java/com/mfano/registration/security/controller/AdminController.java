@@ -2,8 +2,10 @@ package com.mfano.registration.security.controller;
 
 import com.mfano.registration.security.model.Role;
 import com.mfano.registration.security.model.User;
+import com.mfano.registration.security.repository.RoleRepository;
 import com.mfano.registration.security.repository.UserRepository;
 import com.mfano.registration.security.service.UserService;
+import com.mfano.registration.security.service.AdminService;
 import com.mfano.registration.security.service.AuditService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Controller
 @RequestMapping("/admin")
@@ -19,16 +22,18 @@ import java.util.List;
 public class AdminController {
 
     private final UserRepository userRepository;
+    private final RoleRepository roles;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final AuditService auditService;
+    private final AdminService adminService;
 
-    @GetMapping("/dashboard")
+    @GetMapping("/admin/dashboard")
     public String dashboard(Model model) {
         List<User> users = userRepository.findAll();
-        
+
         model.addAttribute("users", users);
-        model.addAttribute("roles", Role.values());
+        model.addAttribute("roles", roles.findAll());
         model.addAttribute("auditEntries", auditService.findAll());
         return "dashboards/admin";
     }
@@ -36,12 +41,12 @@ public class AdminController {
     // Create a new user
     @PostMapping("/create")
     public String createUser(@RequestParam String fullName,
-                             @RequestParam String email,
-                             @RequestParam String password,
-                             @RequestParam String role,
-                             Model model) {
+            @RequestParam String email,
+            @RequestParam String password,
+            @RequestParam Set<Role> role,
+            Model model) {
         try {
-            userService.registerUser(email, password, fullName, role);
+            userService.registerUser(email, password, role);
             model.addAttribute("message", "User created and verification email sent.");
             auditService.record("CREATE_USER", "admin", "Created user: " + email);
         } catch (Exception e) {
@@ -57,7 +62,8 @@ public class AdminController {
         if (user != null) {
             user.setEnabled(!user.isEnabled());
             userRepository.save(user);
-            auditService.record("TOGGLE_USER", "admin", "Toggled user: " + user.getEmail() + " to enabled=" + user.isEnabled());
+            auditService.record("TOGGLE_USER", "admin",
+                    "Toggled user: " + user.getEmail() + " to enabled=" + user.isEnabled());
         }
         return "redirect:/admin/dashboard";
     }
@@ -75,7 +81,6 @@ public class AdminController {
     public String updateRole(@PathVariable Long id, @RequestParam String role) {
         User user = userRepository.findById(id).orElse(null);
         if (user != null) {
-            user.setRole(Role.valueOf(role.toUpperCase()));
             userRepository.save(user);
             auditService.record("UPDATE_ROLE", "admin", "Updated role for user id=" + id + " to " + role);
         }
@@ -103,4 +108,24 @@ public class AdminController {
         }
         return "redirect:/admin/dashboard";
     }
+
+    @GetMapping("/manage-roles")
+    public String manageRoles(Model model) {
+        model.addAttribute("users", adminService.getAllUsers());
+        model.addAttribute("roles", adminService.getAllRoles());
+        return "admin/manage-roles";
+    }
+
+    @PostMapping("/assign-role")
+    public String assignRole(@RequestParam Long userId, @RequestParam Long roleId) {
+        adminService.assignRoleToUser(userId, roleId);
+        return "redirect:/admin/manage-roles?success";
+    }
+
+    @PostMapping("/remove-role")
+    public String removeRole(@RequestParam Long userId, @RequestParam Long roleId) {
+        adminService.removeRoleFromUser(userId, roleId);
+        return "redirect:/admin/manage-roles?removed";
+    }
+
 }

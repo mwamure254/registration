@@ -3,20 +3,19 @@ package com.mfano.registration.security.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import com.mfano.registration.security.model.CustomUserDetails;
+import com.mfano.registration.security.config.CustomUserDetails;
+import com.mfano.registration.security.config.SecurityUtils;
 
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.ui.Model;
 
 @Controller
 public class DashboardController {
-  /*
-   * @GetMapping("/admin/dashboard")
-   * public String adminDashboard(Model model) {
-   * return "dashboards/admin";
-   * }
-   */
+
   @GetMapping("/director/dashboard")
   public String directorDashboard(Model model) {
     return "dashboards/director";
@@ -28,28 +27,47 @@ public class DashboardController {
   }
 
   @GetMapping("/user/dashboard")
-  public String userDashboard(@AuthenticationPrincipal UserDetails user, Model model) {
-    model.addAttribute("email", user.getUsername());
+  public String userDashboard(Model model) {
     return "dashboards/user";
   }
 
-  @GetMapping("/redirect")
-  public String redirectAfterLogin(org.springframework.security.core.Authentication authentication,
-      Model model) {
-    String role = authentication.getAuthorities().iterator().next().getAuthority();
+  @GetMapping("/dashboard")
+  public String redirectAfterLogin(Authentication authentication, Model model) {
 
-    Object principal = authentication.getPrincipal();
-    if (principal instanceof CustomUserDetails) {
-      CustomUserDetails userDetails = (CustomUserDetails) principal;
-      model.addAttribute("user", userDetails.getUser());
+    CustomUserDetails u = SecurityUtils.getCurrentUser();
+    if (u != null) {
+      model.addAttribute("Email", u.getEmail());
+      model.addAttribute("Username", u.getUsername());
+      model.addAttribute("Firstname", u.getFin());
+      model.addAttribute("Lastname", u.getLan());
+      model.addAttribute("Id", u.getId());
+      model.addAttribute("Enabled", u.isEnabled());
+      model.addAttribute("Roles", u.getRoles());
+
+      if (!u.isEnabled()) {
+        model.addAttribute("error","User not verified");
+      }
+
+      // Extract all roles of the logged-in user
+      Set<String> roles = authentication.getAuthorities()
+          .stream()
+          .map(GrantedAuthority::getAuthority)
+          .collect(Collectors.toSet());
+
+      // Redirect based on role priority
+      if (roles.contains("ROLE_ADMIN")) {
+        return "redirect:/admin/dashboard";
+      }
+
+      if (roles.contains("ROLE_DIRECTOR")) {
+        return "redirect:/director/dashboard";
+      }
+
+      if (roles.contains("ROLE_HOI")) {
+        return "redirect:/hoi/dashboard";
+      }
     }
 
-    if (role.equals("ROLE_ADMIN"))
-      return "redirect:/admin/dashboard";
-    if (role.equals("ROLE_DIRECTOR"))
-      return "redirect:/director/dashboard";
-    if (role.equals("ROLE_HOI"))
-      return "redirect:/hoi/dashboard";
     return "redirect:/user/dashboard";
   }
 

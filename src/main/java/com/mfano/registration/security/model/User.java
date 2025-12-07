@@ -1,12 +1,22 @@
 package com.mfano.registration.security.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "users")
 public class User {
-  @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @Column(nullable = false, unique = true)
@@ -17,37 +27,87 @@ public class User {
 
   private boolean enabled = false;
 
-  private String fullName;
-  private String username = email;
+  private String username;
+  private String fin;
+  private String lan;
 
-  @Enumerated(EnumType.STRING)
-  private Role role = Role.USER;
+  @ManyToMany(fetch = FetchType.EAGER)
+  @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+  private Set<Role> roles = new HashSet<>();
 
   private LocalDateTime createdAt = LocalDateTime.now();
 
-  public User() {}
-
   // getters and setters
-  public Long getId() { return id; }
-  public void setId(Long id) { this.id = id; }
-  public String getEmail() { return email; }
-  public void setEmail(String email) { this.email = email; }
-  public String getPassword() { return password; }
-  public void setPassword(String password) { this.password = password; }
-  public boolean isEnabled() { return enabled; }
-  public void setEnabled(boolean enabled) { this.enabled = enabled; }
-  public String getFullName() { return fullName; }
-  public void setFullName(String fullName) { this.fullName = fullName; }
-  public Role getRole() { return role; }
-  public void setRole(Role role) { this.role = role; }
-  public LocalDateTime getCreatedAt() { return createdAt; }
-  public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public String getFin(String fin) {
+    return fin;
+  }
+
+  public void setFin(String fin) {
+    this.fin = fin;
+  }
+
+  public String getLan(String lan) {
+    return lan;
+  }
+
+  public void setLan(String lan) {
+    this.lan = lan;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
+  }
+
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(LocalDateTime createdAt) {
+    this.createdAt = createdAt;
+  }
 
   public String getUsername() {
     return username;
   }
+
   public void setUsername(String username) {
     this.username = username;
+  }
+
+  public Set<Role> getRoles() {
+    return roles;
+  }
+
+  public void setRoles(Set<Role> roles) {
+    this.roles = roles;
   }
 
 }

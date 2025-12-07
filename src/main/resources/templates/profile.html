@@ -25,7 +25,7 @@
         <div class="card p-3" th:if="${user}">
           <p><strong>Name:</strong> <span th:text="${user.fullName}"></span></p>
           <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
-          <p><strong>Role:</strong> <span th:text="${user.role}"></span></p>
+          <p><strong>Email:</strong> <span th:text="${user.role}"></span></p>
           <p><strong>Enabled:</strong> <span th:text="${user.enabled}"></span></p>
         </div>
         <a href="/logout" class="btn btn-outline-danger mt-2">Logout</a>

@@ -1,27 +1,31 @@
-package com.mfano.registration.security.model;
+package com.mfano.registration.security.config;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.mfano.registration.security.model.User;
 
 public class CustomUserDetails implements UserDetails {
 
-    private final User user;
-
-    public CustomUserDetails(User user) {
-        this.user = user;
-    }
+    private User user;
 
     public User getUser() {
         return user;
     }
-
+    
+    public CustomUserDetails(User user) {
+        this.user = user;
+    }
+    
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
+        return user.getRoles().stream()
+                .map(r -> (GrantedAuthority) () -> "ROLE_" + r.getName())
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -31,7 +35,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getEmail();
+        return user.getUsername();
     }
 
     @Override
@@ -54,17 +58,19 @@ public class CustomUserDetails implements UserDetails {
         return user.isEnabled();
     }
 
-    // Add helper methods
-    public String getFullName() {
-        return user.getFullName();
-    }
-
     public String getEmail() {
         return user.getEmail();
     }
 
-    public Role getRole() {
-        return user.getRole();
+    public String getFin() {
+        return user.getFin();
     }
+
+    public String getLan() {
+        return user.getLan();
+    }
+
+    public Long getId() { return user.getId(); }
+    public Set<String> getRoles() { return user.getRoles().stream().map(r->r.getName()).collect(Collectors.toSet()); }
     
 }

@@ -1,13 +1,17 @@
 package com.mfano.registration.security.controller;
 
+import com.mfano.registration.security.config.CustomUserDetails;
+import com.mfano.registration.security.config.SecurityUtils;
+import com.mfano.registration.security.config.UserDto;
 import com.mfano.registration.security.model.User;
+import com.mfano.registration.security.repository.RoleRepository;
 import com.mfano.registration.security.service.UserService;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,15 +19,20 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequiredArgsConstructor
 public class AuthController {
+    @Autowired
     private final UserService userService;
+    @Autowired
+    private final RoleRepository roleRepo;
 
     @GetMapping("/")
     public String home() {
-        return "redirect:/redirect";
+        return "redirect:/dashboard";
     }
 
     @GetMapping("/register")
     public String registerForm(Model model) {
+
+        model.addAttribute("roles", roleRepo.findAll());
         model.addAttribute("userDto", new UserDto());
         return "register";
     }
@@ -31,8 +40,7 @@ public class AuthController {
     @PostMapping("/register")
     public String registerSubmit(@ModelAttribute UserDto userDto, Model model) {
         try {
-            userService.registerUser(userDto.getEmail(), userDto.getPassword(), userDto.getFullName(),
-                    userDto.getRole());
+            userService.registerUser(userDto.getEmail(), userDto.getPassword(), userDto.getRoles());
             model.addAttribute("message", "Registration successful. Check your email for verification link.");
             return "message";
         } catch (Exception e) {
@@ -42,31 +50,44 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public String loginPage(@RequestParam(value = "error", required = false) String error,
+    public String loginPage(
+            @RequestParam(value = "error", required = false) String error,
             @RequestParam(value = "logout", required = false) String logout,
-            Model model) {
-        if (error != null)
-            model.addAttribute("error", "Invalid credentials or email not verified.");
-        if (logout != null)
-            model.addAttribute("message", "You have been logged out.");
+            Model model,
+            Authentication authentication) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
-            return "login";
+        if (authentication != null && authentication.isAuthenticated()
+                && !(authentication instanceof AnonymousAuthenticationToken)) {
+            return "redirect:/dashboard";
         }
-        return "redirect:/";
+
+        if (error != null) {
+            model.addAttribute("error", "Invalid credentials");
+        }
+
+        if (logout != null) {
+            model.addAttribute("message", "You have been logged out.");
+        }
+
+        return "login";
     }
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/profile")
-    public String userProfile() {
-       
+    public String userProfile(CustomUserDetails userDetails, Model model) {
+
+        CustomUserDetails u = SecurityUtils.getCurrentUser();
+        if (u != null) {
+            model.addAttribute("Email", u.getEmail());
+            model.addAttribute("Username", u.getUsername());
+            model.addAttribute("Id", u.getId());
+        }
         return "profile";
     }
 
     @GetMapping("/logout")
     public String logout() {
-        return "login";
+        return "redirect:/login";
     }
 
     @GetMapping("/verify")
@@ -91,12 +112,12 @@ public class AuthController {
 
     @PostMapping("/resend")
     public String resendSubmit(@RequestParam("email") String email, Model model) {
-        var opt = userService.findByEmail(email);
-        if (opt.isEmpty()) {
+        User user = userService.findByEmail(email);
+        if (user == null) {
             model.addAttribute("error", "No account with that email.");
             return "resend";
         }
-        User user = opt.get();
+        
         if (user.isEnabled()) {
             model.addAttribute("message", "Email already verified. You can login.");
             return "message";

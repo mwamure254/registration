@@ -41,10 +41,7 @@
               </div>
               <div class="col-md-2">
                 <select class="form-select" name="role" required>
-                  <option value="USER">USER</option>
-                  <option value="HOI">HOI</option>
-                  <option value="DIRECTOR">DIRECTOR</option>
-                  <option value="ADMIN">ADMIN</option>
+                  <option th:each="r : ${roles}" th:text="${r.name}" th:value="${r}">USER</option>
                 </select>
               </div>
               <div class="col-md-2">
