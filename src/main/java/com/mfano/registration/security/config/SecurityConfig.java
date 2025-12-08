@@ -24,10 +24,10 @@ public class SecurityConfig {
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http.csrf(csrf -> csrf.disable());
     http.authorizeHttpRequests(auth -> auth
-        .requestMatchers("/admin/**").hasAuthority("ADMIN")
-        .requestMatchers("/director/**").hasAuthority("DIRECTOR")
-        .requestMatchers("/hoi/**").hasAuthority("HOI")
-        .requestMatchers("/user/**").hasAuthority("USER")
+        .requestMatchers("/admin/**").hasRole("ADMIN")
+        .requestMatchers("/director/**").hasRole("DIRECTOR")
+        .requestMatchers("/hoi/**").hasRole("HOI")
+        .requestMatchers("/user/**").hasRole("USER")
         .requestMatchers("/", "/register", "/login", "/verify", "/forgot", "/profile", "/reset-password", "/resend",
             "/error",
             "/css/**", "/js/**")
@@ -62,7 +62,7 @@ public class SecurityConfig {
   }
 
   @Bean
-  public UserDetailsService userDetailsService(){
+  public UserDetailsService userDetailsService() {
     return new CustomUserDetailsService();
   }
 

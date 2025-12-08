@@ -1,6 +1,6 @@
 package com.mfano.registration.security.controller;
 
-import com.mfano.registration.security.model.Role;
+import com.mfano.registration.security.config.UserDto;
 import com.mfano.registration.security.model.User;
 import com.mfano.registration.security.repository.RoleRepository;
 import com.mfano.registration.security.repository.UserRepository;
@@ -14,7 +14,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 
 @Controller
 @RequestMapping("/admin")
@@ -32,6 +31,7 @@ public class AdminController {
     public String dashboard(Model model) {
         List<User> users = userRepository.findAll();
 
+        model.addAttribute("userDto", new UserDto());
         model.addAttribute("users", users);
         model.addAttribute("roles", roles.findAll());
         model.addAttribute("auditEntries", auditService.findAll());
@@ -40,15 +40,12 @@ public class AdminController {
 
     // Create a new user
     @PostMapping("/create")
-    public String createUser(@RequestParam String fullName,
-            @RequestParam String email,
-            @RequestParam String password,
-            @RequestParam Set<Role> role,
+    public String createUser(@ModelAttribute UserDto userDto,
             Model model) {
         try {
-            userService.registerUser(email, password, role);
+            userService.registerUser(userDto.getEmail(), userDto.getPassword(), userDto.getRoles());
             model.addAttribute("message", "User created and verification email sent.");
-            auditService.record("CREATE_USER", "admin", "Created user: " + email);
+            auditService.record("CREATE_USER", "admin", "Created user: " + userDto.getEmail());
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
         }

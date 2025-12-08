@@ -124,4 +124,9 @@ public class UserService {
         passwordResetTokenRepository.deleteByUserId(user.getId());
     }
 
+    public Object findById(Long id) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'findById'");
+    }
+
 }

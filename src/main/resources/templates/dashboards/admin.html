@@ -29,9 +29,9 @@
         <div class="card my-4">
           <div class="card-body">
             <h5>Create New User</h5>
-            <form th:action="@{/admin/create}" method="post" class="row g-2">
+            <form th:action="@{/admin/create}" method="post" class="row g-2 d-flex">
               <div class="col-md-3">
-                <input type="text" class="form-control" name="fullName" placeholder="Full name" required>
+                <input type="text" class="form-control" name="username" placeholder="Username" required>
               </div>
               <div class="col-md-3">
                 <input type="email" class="form-control" name="email" placeholder="Email" required>
@@ -66,32 +66,35 @@
           <tbody>
             <tr th:each="u : ${users}">
               <td th:text="${u.id}"></td>
-              <td th:text="${u.fullName}"></td>
+              <td th:text="${u.username}"></td>
               <td th:text="${u.email}"></td>
               <td>
                 <form th:action="@{'/admin/update-role/' + ${u.id}}" method="post" class="d-flex">
                   <select class="form-select form-select-sm" name="role">
-                    <option th:each="r : ${roles}" th:value="${r}" th:text="${r}" th:selected="${u.role} == ${r}">
+                    <option th:each="r : ${roles}" th:value="${r}" th:text="${r}" th:selected="${u.roles.contains(r)}">
                     </option>
                   </select>
                   <button class="btn btn-sm btn-outline-success ms-2">Save</button>
                 </form>
               </td>
               <td>
-                <span th:text="${u.enabled}"></span>
+                <span th:text="${u.enabled} ? 'Yes' : 'No'"></span>
               </td>
               <td>
-                <a th:href="@{'/admin/toggle/' + ${u.id}}" class="btn btn-sm btn-warning">Toggle</a>
-                <a th:href="@{'/admin/delete/' + ${u.id}}" class="btn btn-sm btn-danger"
-                  onclick="return confirm('Delete this user?')">Delete</a>
-                <a th:href="@{'/admin/resend/' + ${u.id}}" class="btn btn-sm btn-info">Resend</a>
+                <div class="d-flex flex-wrap gap-1">
+                  <a th:href="@{'/admin/toggle/' + ${u.id}}" class="btn btn-sm btn-warning">Toggle</a>
+                  <a th:href="@{'/admin/delete/' + ${u.id}}" class="btn btn-sm btn-danger"
+                    onclick="return confirm('Delete this user?')">Delete</a>
+                  <a th:href="@{'/admin/resend/' + ${u.id}}" class="btn btn-sm btn-info">Resend</a>
 
-                <form th:action="@{'/admin/reset-password/' + ${u.id}}" method="post" class="d-inline">
-                  <input type="password" name="newPassword" placeholder="New Pass"
-                    class="form-control form-control-sm d-inline w-auto" required>
-                  <button class="btn btn-sm btn-secondary" type="submit">Reset</button>
-                </form>
+                  <form th:action="@{'/admin/reset-password/' + ${u.id}}" method="post" class="d-inline-flex">
+                    <input type="password" name="newPassword" placeholder="New Pass"
+                      class="form-control form-control-sm d-inline w-auto" required>
+                    <button class="btn btn-sm btn-secondary" type="submit">Reset</button>
+                  </form>
+                </div>
               </td>
+
             </tr>
           </tbody>
         </table>
@@ -118,7 +121,7 @@
           </tbody>
         </table>
 
-        <a href="/logout" class="btn btn-outline-danger mt-3">Logout</a>
+        <a href="/logout" class="btn btn-outline-danger d-flex mt-3">Logout</a>
       </div>
     </div>
   </main>

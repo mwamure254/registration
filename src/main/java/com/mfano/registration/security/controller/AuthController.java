@@ -1,7 +1,6 @@
 package com.mfano.registration.security.controller;
 
 import com.mfano.registration.security.config.CustomUserDetails;
-import com.mfano.registration.security.config.SecurityUtils;
 import com.mfano.registration.security.config.UserDto;
 import com.mfano.registration.security.model.User;
 import com.mfano.registration.security.repository.RoleRepository;
@@ -10,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -56,32 +54,29 @@ public class AuthController {
             Model model,
             Authentication authentication) {
 
+        // If user is already logged in → redirect to dashboard
         if (authentication != null && authentication.isAuthenticated()
-                && !(authentication instanceof AnonymousAuthenticationToken)) {
+                && authentication instanceof CustomUserDetails) {
             return "redirect:/dashboard";
         }
 
+        // Error from Spring Security (bad credentials or disabled)
         if (error != null) {
-            model.addAttribute("error", "Invalid credentials");
+            model.addAttribute("error", "Invalid Username or Password.");
         }
 
+        // Logout confirmation
         if (logout != null) {
             model.addAttribute("message", "You have been logged out.");
         }
 
-        return "login";
+        return "login"; // Return login view
     }
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/profile")
-    public String userProfile(CustomUserDetails userDetails, Model model) {
+    public String userProfile() {
 
-        CustomUserDetails u = SecurityUtils.getCurrentUser();
-        if (u != null) {
-            model.addAttribute("Email", u.getEmail());
-            model.addAttribute("Username", u.getUsername());
-            model.addAttribute("Id", u.getId());
-        }
         return "profile";
     }
 
@@ -117,7 +112,7 @@ public class AuthController {
             model.addAttribute("error", "No account with that email.");
             return "resend";
         }
-        
+
         if (user.isEnabled()) {
             model.addAttribute("message", "Email already verified. You can login.");
             return "message";
