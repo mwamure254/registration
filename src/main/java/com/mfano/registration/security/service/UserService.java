@@ -75,6 +75,10 @@ public class UserService {
         tokenRepository.delete(vt);
         return "valid";
     }
+    // Get User By Id
+	public User findById(Long id) {
+		return userRepository.findById(id).orElse(null);
+	}
 
     public User findByEmail(String email) {
         return userRepository.findByEmail(email);
@@ -122,11 +126,6 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
         passwordResetTokenRepository.deleteByUserId(user.getId());
-    }
-
-    public Object findById(Long id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findById'");
     }
 
 }

@@ -22,11 +22,12 @@
 
       <div class="col-lg-10 p-4">
         <h2>Profile</h2>
-        <div class="card p-3" th:if="${user}">
-          <p><strong>Name:</strong> <span th:text="${user.fullName}"></span></p>
-          <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
-          <p><strong>Email:</strong> <span th:text="${user.role}"></span></p>
-          <p><strong>Enabled:</strong> <span th:text="${user.enabled}"></span></p>
+        <div class="card p-3">
+          <p><strong>Id:</strong> <span th:text="${id}"></span></p>
+          <p><strong>Firstname:</strong> <span th:text="${firstname}"></span></p>
+          <p><strong>Lastname:</strong> <span th:text="${lastname}"></span></p>
+          <p><strong>Username:</strong> <span th:text="${username}"></span></p>
+          <p><strong>Email:</strong> <span th:text="${email}"></span></p>
         </div>
         <a href="/logout" class="btn btn-outline-danger mt-2">Logout</a>
       </div>

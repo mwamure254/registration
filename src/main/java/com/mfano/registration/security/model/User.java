@@ -51,7 +51,7 @@ public class User {
   }
 
   public void setEmail(String email) {
-    this.email = email;
+    this.email = email.toLowerCase();
   }
 
   public String getFin(String fin) {
@@ -59,7 +59,7 @@ public class User {
   }
 
   public void setFin(String fin) {
-    this.fin = fin;
+    this.fin = fin.toUpperCase();
   }
 
   public String getLan(String lan) {
@@ -67,7 +67,7 @@ public class User {
   }
 
   public void setLan(String lan) {
-    this.lan = lan;
+    this.lan = lan.toUpperCase();
   }
 
   public String getPassword() {
@@ -99,7 +99,7 @@ public class User {
   }
 
   public void setUsername(String username) {
-    this.username = username;
+    this.username = username.toLowerCase();
   }
 
   public Set<Role> getRoles() {

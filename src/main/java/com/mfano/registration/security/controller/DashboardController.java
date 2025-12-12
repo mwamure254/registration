@@ -2,24 +2,19 @@ package com.mfano.registration.security.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.ui.Model;
 
 import com.mfano.registration.security.config.CustomUserDetails;
-import com.mfano.registration.security.repository.RoleRepository;
 
 import lombok.RequiredArgsConstructor;
-
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
 public class DashboardController {
-  @Autowired
-  private final RoleRepository roleRepo;
 
   @GetMapping("/dashboard")
   public String redirectAfterLogin(Authentication auth, Model model) {
@@ -41,19 +36,17 @@ public class DashboardController {
       return "redirect:/login?error=not_verified";
     }
 
-    // Add user info to model (for Thymeleaf dashboard pages)
-    model.addAttribute("id", u.getId());
-    model.addAttribute("username", u.getUsername());
-    model.addAttribute("email", u.getEmail());
-    model.addAttribute("firstname", u.getFin());
-    model.addAttribute("lastname", u.getLan());
-    model.addAttribute("roles", u.getRoles());
-
     // Extract roles
     Set<String> roles = u.getAuthorities()
         .stream()
         .map(GrantedAuthority::getAuthority)
         .collect(Collectors.toSet());
+
+    // If user is not assigned any role
+    if (roles.isEmpty()) {
+      model.addAttribute("error", "contact the administrater");
+      return "redirect:/login?error";
+    }
 
     // Redirect based on role priority
     if (roles.contains("ROLE_ADMIN")) {
@@ -66,15 +59,8 @@ public class DashboardController {
       return "redirect:/user/dashboard";
     }
 
-    // Fallback if no roles
-    return "redirect:/login?error=no_role";
-  }
-
-  // Individual dashboard pages
-  @GetMapping("/admin/dashboard")
-  public String adminDashboard(Model model) {
-    model.addAttribute("roles", roleRepo.findAll());
-    return "dashboards/admin";
+    // Fallback
+    return "redirect:/login?error";
   }
 
   @GetMapping("/director/dashboard")

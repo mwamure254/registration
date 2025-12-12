@@ -75,13 +75,25 @@ public class AuthController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/profile")
-    public String userProfile() {
+    public String userProfile(Authentication auth, Model model) {
+        if (!(auth.getPrincipal() instanceof CustomUserDetails u)) {
+            model.addAttribute("error", "user not authenticated");
+            return "redirect:/login";
+        }
+        // Add user info to model (for Thymeleaf dashboard pages)
+        model.addAttribute("id", u.getId());
+        model.addAttribute("username", u.getUsername());
+        model.addAttribute("email", u.getEmail());
+        model.addAttribute("firstname", u.getFin());
+        model.addAttribute("lastname", u.getLan());
+        model.addAttribute("roles", u.getRoles());
 
         return "profile";
     }
 
     @GetMapping("/logout")
-    public String logout() {
+    public String logout(Model model) {
+        model.addAttribute("message", "You have been logged out successfylly");
         return "redirect:/login";
     }
 

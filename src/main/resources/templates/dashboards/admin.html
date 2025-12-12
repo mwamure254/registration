@@ -69,13 +69,7 @@
               <td th:text="${u.username}"></td>
               <td th:text="${u.email}"></td>
               <td>
-                <form th:action="@{'/admin/update-role/' + ${u.id}}" method="post" class="d-flex">
-                  <select class="form-select form-select-sm" name="role">
-                    <option th:each="r : ${roles}" th:value="${r}" th:text="${r}" th:selected="${u.roles.contains(r)}">
-                    </option>
-                  </select>
-                  <button class="btn btn-sm btn-outline-success ms-2">Save</button>
-                </form>
+                <a class="btn btn-success" th:href="@{'/admin/manage-roles/' + ${u.id}}">manage</a>
               </td>
               <td>
                 <span th:text="${u.enabled} ? 'Yes' : 'No'"></span>

@@ -7,6 +7,8 @@ import com.mfano.registration.security.repository.UserRepository;
 import com.mfano.registration.security.service.UserService;
 import com.mfano.registration.security.service.AdminService;
 import com.mfano.registration.security.service.AuditService;
+import com.mfano.registration.security.service.RoleService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -22,12 +24,13 @@ public class AdminController {
 
     private final UserRepository userRepository;
     private final RoleRepository roles;
+    private final RoleService roleService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final AuditService auditService;
     private final AdminService adminService;
 
-    @GetMapping("/admin/dashboard")
+    @GetMapping("/dashboard")
     public String dashboard(Model model) {
         List<User> users = userRepository.findAll();
 
@@ -37,6 +40,7 @@ public class AdminController {
         model.addAttribute("auditEntries", auditService.findAll());
         return "dashboards/admin";
     }
+    private String redirect = "redirect:/admin/dashboard";
 
     // Create a new user
     @PostMapping("/create")
@@ -49,7 +53,7 @@ public class AdminController {
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
         }
-        return "redirect:/admin/dashboard";
+        return redirect;
     }
 
     // Enable/Disable user
@@ -62,7 +66,7 @@ public class AdminController {
             auditService.record("TOGGLE_USER", "admin",
                     "Toggled user: " + user.getEmail() + " to enabled=" + user.isEnabled());
         }
-        return "redirect:/admin/dashboard";
+        return redirect;
     }
 
     // Delete user
@@ -70,7 +74,7 @@ public class AdminController {
     public String deleteUser(@PathVariable Long id) {
         userRepository.deleteById(id);
         auditService.record("DELETE_USER", "admin", "Deleted user id=" + id);
-        return "redirect:/admin/dashboard";
+        return redirect;
     }
 
     // Change role
@@ -81,7 +85,7 @@ public class AdminController {
             userRepository.save(user);
             auditService.record("UPDATE_ROLE", "admin", "Updated role for user id=" + id + " to " + role);
         }
-        return "redirect:/admin/dashboard";
+        return redirect;
     }
 
     // Reset user password
@@ -93,7 +97,7 @@ public class AdminController {
             userRepository.save(user);
             auditService.record("RESET_PASSWORD", "admin", "Reset password for user id=" + id);
         }
-        return "redirect:/admin/dashboard";
+        return redirect;
     }
 
     @GetMapping("/resend/{id}")
@@ -103,26 +107,30 @@ public class AdminController {
             userService.createAndSendToken(user);
             auditService.record("RESEND_VERIFICATION", "admin", "Resent token to user id=" + id);
         }
-        return "redirect:/admin/dashboard";
+        return redirect;
     }
 
-    @GetMapping("/manage-roles")
-    public String manageRoles(Model model) {
-        model.addAttribute("users", adminService.getAllUsers());
-        model.addAttribute("roles", adminService.getAllRoles());
+    @GetMapping("/manage-roles/{id}")
+    public String manageRoles(@PathVariable Long id, Model model) {
+        User user = userService.findById(id);
+        
+		model.addAttribute("user", user);
+		model.addAttribute("userRoles", roleService.getUserRoles(user));
+		model.addAttribute("userNotRoles", roleService.getUserNotRoles(user));
+
         return "admin/manage-roles";
     }
 
-    @PostMapping("/assign-role")
-    public String assignRole(@RequestParam Long userId, @RequestParam Long roleId) {
+    @PostMapping("/assign-role/{userId}/{roleId}")
+    public String assignRole(@PathVariable Long userId, @PathVariable Long roleId) {
         adminService.assignRoleToUser(userId, roleId);
-        return "redirect:/admin/manage-roles?success";
+        return "redirect:/admin/manage-roles/{userId}";
     }
 
-    @PostMapping("/remove-role")
-    public String removeRole(@RequestParam Long userId, @RequestParam Long roleId) {
+    @PostMapping("/remove-role/{userId}/{roleId}")
+    public String removeRole(@PathVariable Long userId, @PathVariable Long roleId) {
         adminService.removeRoleFromUser(userId, roleId);
-        return "redirect:/admin/manage-roles?removed";
+        return "redirect:/admin/manage-roles/{userId}";
     }
 
 }

@@ -18,8 +18,12 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique=true, nullable=false)
+    @Column(unique = true, nullable = false)
     private String name;
-    
+
     private String description;
+
+    public void setName(String name) {
+        this.name = name.toUpperCase();
+    }
 }
