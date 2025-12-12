@@ -7,9 +7,13 @@ import com.mfano.registration.security.repository.RoleRepository;
 import com.mfano.registration.security.service.UserService;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,10 +25,55 @@ public class AuthController {
     private final UserService userService;
     @Autowired
     private final RoleRepository roleRepo;
+    private String msg = "message";
+    private final String login = "redirect:/login?error";
 
-    @GetMapping("/")
-    public String home() {
-        return "redirect:/dashboard";
+    @GetMapping("/dashboard")
+    public String redirectAfterLogin(Authentication auth, Model model) {
+
+        if (auth == null || !auth.isAuthenticated()) {
+            model.addAttribute("error", "user not authenticated");
+            return login;
+        }
+
+        Object principal = auth.getPrincipal();
+        if (!(principal instanceof CustomUserDetails u)) {
+            model.addAttribute("error", "invalid user");
+            return login;
+        }
+
+        // Check if user is enabled
+        if (!u.isEnabled()) {
+            model.addAttribute("error", "user not verified");
+            return login;
+        }
+
+        // Extract roles
+        Set<String> roles = u.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet());
+
+        // If user is not assigned any role
+        if (roles.isEmpty()) {
+            model.addAttribute("error", "contact the system admin");
+            return login;
+        }
+
+        // Redirect based on role priority
+        if (roles.contains("ROLE_ADMIN")) {
+            return "redirect:/admin/dashboard";
+        } else if (roles.contains("ROLE_DIRECTOR")) {
+            return "redirect:/director/dashboard";
+        } else if (roles.contains("ROLE_HOI")) {
+            return "redirect:/hoi/dashboard";
+        } else if (roles.contains("ROLE_USER")) {
+            return "redirect:/user/dashboard";
+        }
+
+        // Fallback
+        model.addAttribute("error", "Please contact the system admin");
+        return login;
     }
 
     @GetMapping("/register")
@@ -32,7 +81,7 @@ public class AuthController {
 
         model.addAttribute("roles", roleRepo.findAll());
         model.addAttribute("userDto", new UserDto());
-        return "register";
+        return "security/register";
     }
 
     @PostMapping("/register")
@@ -40,10 +89,10 @@ public class AuthController {
         try {
             userService.registerUser(userDto.getEmail(), userDto.getPassword(), userDto.getRoles());
             model.addAttribute("message", "Registration successful. Check your email for verification link.");
-            return "message";
+            return msg;
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
-            return "register";
+            return "security/register";
         }
     }
 
@@ -70,7 +119,7 @@ public class AuthController {
             model.addAttribute("message", "You have been logged out.");
         }
 
-        return "login"; // Return login view
+        return "security/login"; // Return login view
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -88,12 +137,12 @@ public class AuthController {
         model.addAttribute("lastname", u.getLan());
         model.addAttribute("roles", u.getRoles());
 
-        return "profile";
+        return "security/profile";
     }
 
     @GetMapping("/logout")
     public String logout(Model model) {
-        model.addAttribute("message", "You have been logged out successfylly");
+        model.addAttribute("message", "You have been logged out successfully");
         return "redirect:/login";
     }
 
@@ -102,19 +151,19 @@ public class AuthController {
         String result = userService.validateVerificationToken(token);
         if ("valid".equals(result)) {
             model.addAttribute("message", "Email verified! You can now login.");
-            return "message";
+            return msg;
         } else if ("expired".equals(result)) {
             model.addAttribute("error", "Token expired. Please register again.");
-            return "message";
+            return msg;
         } else {
             model.addAttribute("error", "Invalid token.");
-            return "message";
+            return msg;
         }
     }
 
     @GetMapping("/resend")
     public String resendForm() {
-        return "resend";
+        return "security/resend";
     }
 
     @PostMapping("/resend")
@@ -122,22 +171,22 @@ public class AuthController {
         User user = userService.findByEmail(email);
         if (user == null) {
             model.addAttribute("error", "No account with that email.");
-            return "resend";
+            return "security/resend";
         }
 
         if (user.isEnabled()) {
             model.addAttribute("message", "Email already verified. You can login.");
-            return "message";
+            return msg;
         }
         userService.createAndSendToken(user);
         model.addAttribute("message", "Verification email resent. Check your inbox.");
-        return "message";
+        return msg;
     }
 
     // Forgot/reset endpoints
     @GetMapping("/forgot")
     public String forgotForm() {
-        return "forgot";
+        return "security/forgot";
     }
 
     @PostMapping("/forgot")
@@ -148,7 +197,7 @@ public class AuthController {
         } catch (Exception e) {
             model.addAttribute("message", "If an account exists, a reset link was sent.");
         }
-        return "message";
+        return msg;
     }
 
     @GetMapping("/reset-password")
@@ -156,13 +205,13 @@ public class AuthController {
         String res = userService.validatePasswordResetToken(token);
         if ("valid".equals(res)) {
             model.addAttribute("token", token);
-            return "reset-password";
+            return "security/reset-password";
         } else if ("expired".equals(res)) {
             model.addAttribute("error", "Token expired.");
-            return "message";
+            return msg;
         } else {
             model.addAttribute("error", "Invalid token.");
-            return "message";
+            return msg;
         }
     }
 
@@ -171,10 +220,10 @@ public class AuthController {
         var optUser = userService.getUserByPasswordResetToken(token);
         if (optUser.isEmpty()) {
             model.addAttribute("error", "Invalid token.");
-            return "message";
+            return msg;
         }
         userService.changePassword(optUser.get(), password);
         model.addAttribute("message", "Password changed. You can now login.");
-        return "message";
+        return msg;
     }
 }

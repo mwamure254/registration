@@ -38,8 +38,9 @@ public class AdminController {
         model.addAttribute("users", users);
         model.addAttribute("roles", roles.findAll());
         model.addAttribute("auditEntries", auditService.findAll());
-        return "dashboards/admin";
+        return "admin/dashboard";
     }
+
     private String redirect = "redirect:/admin/dashboard";
 
     // Create a new user
@@ -71,10 +72,16 @@ public class AdminController {
 
     // Delete user
     @GetMapping("/delete/{id}")
-    public String deleteUser(@PathVariable Long id) {
-        userRepository.deleteById(id);
-        auditService.record("DELETE_USER", "admin", "Deleted user id=" + id);
-        return redirect;
+    public String deleteUser(@PathVariable Long id, Model model) {
+        try {
+            userRepository.deleteById(id);
+            auditService.record("DELETE_USER", "admin", "Deleted user id=" + id);
+            model.addAttribute("message", "user successfully deleted");
+            return redirect;
+        } catch (Exception e) {
+            model.addAttribute("error", "Sorry! Failed to delete user");
+            return redirect;
+        }
     }
 
     // Change role
@@ -113,10 +120,10 @@ public class AdminController {
     @GetMapping("/manage-roles/{id}")
     public String manageRoles(@PathVariable Long id, Model model) {
         User user = userService.findById(id);
-        
-		model.addAttribute("user", user);
-		model.addAttribute("userRoles", roleService.getUserRoles(user));
-		model.addAttribute("userNotRoles", roleService.getUserNotRoles(user));
+
+        model.addAttribute("user", user);
+        model.addAttribute("userRoles", roleService.getUserRoles(user));
+        model.addAttribute("userNotRoles", roleService.getUserNotRoles(user));
 
         return "admin/manage-roles";
     }

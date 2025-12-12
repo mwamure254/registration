@@ -39,7 +39,7 @@ public class SecurityConfig {
             // .successForwardUrl("/dashboard")
             .permitAll())
 
-        .exceptionHandling(handling -> handling.accessDeniedPage("/error"))
+        .exceptionHandling(handling -> handling.accessDeniedPage("/error-page"))
         .logout(logout -> logout.invalidateHttpSession(true).clearAuthentication(true)
             .logoutSuccessUrl("/login").permitAll())
 
