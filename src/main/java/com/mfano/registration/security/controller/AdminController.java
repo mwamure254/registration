@@ -131,12 +131,14 @@ public class AdminController {
     @PostMapping("/assign-role/{userId}/{roleId}")
     public String assignRole(@PathVariable Long userId, @PathVariable Long roleId) {
         adminService.assignRoleToUser(userId, roleId);
+            auditService.record("UPDATE_ROLE", "admin", "Assigned user id=" + userId + "role id=" + roleId);
         return "redirect:/admin/manage-roles/{userId}";
     }
 
     @PostMapping("/remove-role/{userId}/{roleId}")
     public String removeRole(@PathVariable Long userId, @PathVariable Long roleId) {
         adminService.removeRoleFromUser(userId, roleId);
+            auditService.record("UPDATE_ROLE", "admin", "Revoked role id=" + roleId + " from user id=" + userId);
         return "redirect:/admin/manage-roles/{userId}";
     }
 
