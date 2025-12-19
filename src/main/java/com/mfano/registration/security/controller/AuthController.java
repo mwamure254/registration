@@ -25,7 +25,7 @@ public class AuthController {
     private final UserService userService;
     @Autowired
     private final RoleRepository roleRepo;
-    private String msg = "message";
+    private String msg = "security/message";
     private final String login = "redirect:/login?error";
 
     @GetMapping("/dashboard")
@@ -200,7 +200,7 @@ public class AuthController {
         return msg;
     }
 
-    @GetMapping("/reset-password")
+    @GetMapping("/password-reset")
     public String resetPasswordForm(@RequestParam("token") String token, Model model) {
         String res = userService.validatePasswordResetToken(token);
         if ("valid".equals(res)) {

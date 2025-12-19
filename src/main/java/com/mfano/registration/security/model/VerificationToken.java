@@ -3,6 +3,9 @@ package com.mfano.registration.security.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 @Entity
 public class VerificationToken {
   @Id
@@ -14,6 +17,7 @@ public class VerificationToken {
 
   @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(nullable = false, name = "user_id")
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private User user;
 
   private LocalDateTime expiryDate;
