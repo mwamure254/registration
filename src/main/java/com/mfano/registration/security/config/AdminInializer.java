@@ -22,7 +22,6 @@ public class AdminInializer implements CommandLineRunner {
     private UserRepository userRepository;
     @Autowired
     private RoleRepository roleRepo;
-
     @Autowired
     private PasswordEncoder passwordEncoder;
 
