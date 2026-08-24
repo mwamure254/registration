@@ -1,6 +1,7 @@
 
 # Build stage
 FROM maven:3.9-eclipse-temurin-21 AS build
+VOLUME /tmp
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
@@ -11,3 +12,4 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 ENTRYPOINT ["sh", "-c", "java -jar /app/app.jar"]
+EXPOSE 8080
